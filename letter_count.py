@@ -2,6 +2,8 @@
 
 import string
 from operator import itemgetter
+from pathlib import Path
+import json
 
 min_length = 4
 max_length = 6
@@ -11,17 +13,31 @@ def get_words(a, b):
         all_words = f.read().splitlines()
         words_4_5_6 = ([i.upper() for i in all_words if len(i)>= a and len(i) <= b])
         return words_4_5_6
+
+def get_json_words(a, b):
+    dir = 'scrabble_dicts/'
+    files = []
+    words = []
+    for i in range(a, b+1):
+        files.append(f'{i}-letter-words.json')
     
-words_list = get_words(min_length,max_length)
-# print(words)
+    dicts = [json.loads(Path(dir+file).read_text()) for file in files]
+
+    for item in dicts:
+        for dict in item:
+            for v in dict.values():
+                words.append(v.upper())
+
+    return words
+
+words_list = get_json_words(min_length,max_length)
 
 alpha = string.ascii_uppercase
 
-# print(alpha)
+# # print(alpha)
 for start_letter in alpha:
     print(start_letter)
     words = [x for x in words_list if x.startswith(start_letter)]
-
     for wordlen in range(min_length, max_length+1):
         print(f'Count for {wordlen} letter words!')
         worddict = {idx : {letter : set() for letter in alpha} for idx in range(wordlen)}
@@ -36,7 +52,7 @@ for start_letter in alpha:
         for item in lens:
             sort = sorted(item,key=itemgetter(0), reverse=True)
             top_5 = sort[:5]
-            # print(top_5)
+            print(top_5)
             rank=1
             for num, idx, letter in top_5:
                 print(f"Starting letter: {start_letter}    Position: {idx+1}    Letter: {letter}    Total: {num}    Rank: {rank}")
